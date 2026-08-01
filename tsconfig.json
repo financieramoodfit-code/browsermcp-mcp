@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "outDir": "dist",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@r2r/messaging/*": ["./vendor/r2r-messaging/*"],
+      "@repo/messaging/*": ["./vendor/repo-messaging/*"],
+      "@repo/config/*": ["./vendor/config/*"],
+      "@repo/types/*": ["./vendor/types/*"],
+      "@repo/utils": ["./vendor/utils/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "vendor/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
