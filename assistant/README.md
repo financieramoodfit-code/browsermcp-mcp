@@ -20,6 +20,8 @@ cordial de la marca. Genera las respuestas con Claude (API de Anthropic).
 | `stock.ts` | Descarga la planilla de Google como CSV, la parsea y busca productos por código o descripción. Devuelve precio mayorista, talles y stock. |
 | `reply.ts` | Combina la persona + la ficha de stock y le pide la respuesta a Claude. |
 | `webhook.ts` | Servidor web que recibe mensajes/comentarios de Instagram y Facebook (Meta) y responde automáticamente. |
+| `derivaciones.ts` | Registro en memoria de los números a derivar al grupo PEDIDOS ONLINE. |
+| `panel.ts` | **Panel web interno** para el equipo: genera respuestas para copiar (TikTok) y muestra las derivaciones pendientes. |
 | `cli.ts` | Para probar el asistente en tu compu, sin redes. |
 
 ## Cómo probarlo localmente (sin redes)
@@ -86,6 +88,21 @@ El asistente **no** puede escribir solo en un grupo de WhatsApp; el equipo human
 toma ese registro y lo reenvía. Si querés automatizar ese último paso, se puede
 integrar con la API de WhatsApp Cloud como mejora futura.
 
+## Panel interno del equipo (`/panel`)
+
+Una vez que el servidor está corriendo (`npm run assistant:start`), tu equipo
+puede entrar a `https://TU-DOMINIO/panel?token=TU_PANEL_TOKEN` y:
+
+- **Generar respuestas** pegando un comentario/mensaje del cliente (ideal para
+  **TikTok**, donde no hay API): el asistente arma la respuesta con precio, talles
+  y stock, y hay un botón para **copiarla**.
+- **Ver las derivaciones pendientes**: la lista de números de clientes que
+  pidieron ser contactados, con botón para **copiar el número** y marcarlo como
+  **enviado** una vez que lo pasaron al grupo PEDIDOS ONLINE.
+
+Protección: seteá `PANEL_TOKEN` en el `.env`. Si lo dejás vacío, el panel queda
+sin protección (solo para pruebas locales). Servilo siempre detrás de HTTPS.
+
 ## TikTok — limitación real (importante)
 
 **TikTok no ofrece una API pública que permita leer y responder DMs o
@@ -105,5 +122,6 @@ permite.
 
 - ✅ Cerebro del asistente: persona + consulta de stock + respuestas con Claude — **funciona y está probado**.
 - ✅ Instagram y Facebook: **funciona**, pero necesita tu app de Meta, permisos aprobados, tokens y hosting.
-- ⚠️ TikTok: **no es posible** de forma autónoma por límites de la plataforma; queda semiautomático.
-- ⚠️ WhatsApp / grupo PEDIDOS ONLINE: el número queda registrado para que lo reenvíe una persona (automatizable a futuro con WhatsApp Cloud API).
+- ⚠️ TikTok: **no es posible** de forma autónoma por límites de la plataforma; queda semiautomático (el panel `/panel` genera la respuesta para copiar).
+- ⚠️ Grupo PEDIDOS ONLINE: el número queda registrado y visible en el panel para que una persona lo reenvíe.
+- ✅ Panel interno `/panel`: para generar respuestas (TikTok) y ver/gestionar derivaciones.

@@ -21,15 +21,13 @@
 import http from "node:http";
 
 import { generarRespuesta } from "./reply.js";
-import { store } from "./config.js";
+import { registrarDerivacion } from "./derivaciones.js";
+import { manejarPanel } from "./panel.js";
 
 const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN ?? "";
 const PAGE_TOKEN = process.env.META_PAGE_TOKEN ?? "";
 const PORT = Number(process.env.PORT ?? 3000);
 const GRAPH = "https://graph.facebook.com/v21.0";
-
-/** Log de derivaciones pendientes: números que hay que enviar al grupo PEDIDOS ONLINE. */
-export const derivacionesPendientes: { numero: string; origen: string; fecha: string }[] = [];
 
 /** Envía un mensaje directo por Messenger / Instagram usando la Graph API. */
 async function enviarMensaje(destinatarioId: string, texto: string): Promise<void> {
@@ -67,15 +65,6 @@ async function responderComentario(comentarioId: string, texto: string): Promise
   }
 }
 
-/** Procesa una respuesta del asistente: registra la derivación si corresponde. */
-function registrarDerivacion(numero: string | null, origen: string): void {
-  if (!numero) return;
-  const fecha = new Date().toISOString();
-  derivacionesPendientes.push({ numero, origen, fecha });
-  // El equipo humano toma este log y lo reenvía al grupo de WhatsApp PEDIDOS ONLINE.
-  console.log(`[mood] >>> DERIVAR A ${store.grupoDerivacion}: ${numero} (origen ${origen})`);
-}
-
 /** Maneja el cuerpo de un evento webhook de Meta (mensajes + comentarios). */
 export async function manejarEvento(body: any): Promise<void> {
   const entries = Array.isArray(body?.entry) ? body.entry : [];
@@ -107,8 +96,11 @@ export async function manejarEvento(body: any): Promise<void> {
 
 /** Crea el servidor HTTP con verificación (GET) y recepción de eventos (POST). */
 export function crearServidor(): http.Server {
-  return http.createServer((req, res) => {
+  return http.createServer(async (req, res) => {
     const url = new URL(req.url ?? "/", `http://localhost:${PORT}`);
+
+    // Panel interno (/panel*). Si maneja la request, terminamos acá.
+    if (await manejarPanel(req, res, url)) return;
 
     // Verificación del webhook (Meta hace un GET al configurarlo).
     if (req.method === "GET" && url.pathname === "/webhook") {
