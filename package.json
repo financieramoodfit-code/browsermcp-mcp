@@ -17,9 +17,13 @@
     "build": "tsup src/index.ts --format esm && shx chmod +x dist/*.js",
     "prepare": "npm run build",
     "watch": "tsup src/index.ts --format esm --watch ",
-    "inspector": "CLIENT_PORT=9001 SERVER_PORT=9002 pnpx @modelcontextprotocol/inspector node dist/index.js"
+    "inspector": "CLIENT_PORT=9001 SERVER_PORT=9002 pnpx @modelcontextprotocol/inspector node dist/index.js",
+    "assistant:build": "tsc -p assistant/tsconfig.json",
+    "assistant:start": "node dist-assistant/webhook.js",
+    "assistant:cli": "node dist-assistant/cli.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
     "@modelcontextprotocol/sdk": "^1.8.0",
     "commander": "^13.1.0",
     "ws": "^8.18.1",
