@@ -5,6 +5,24 @@ en tus redes** (Instagram, TikTok, Facebook) usando **Browser MCP** (este repo) 
 **tu navegador ya logueado**, con los precios/stock salidos de tu planilla de Google
 Sheets.
 
+## Inicio rápido (un solo comando)
+
+En tu PC/Mac, con Chrome logueado en tus redes + extensión **Browser MCP** en
+*Connect*, y el CLI de Claude ya instalado y logueado:
+
+```bash
+git clone https://github.com/financieramoodfit-code/browsermcp-mcp.git
+cd browsermcp-mcp
+git checkout claude/mood-mayorista-virtual-assistant-6u2j7b
+bash docs/asistente-mood-mayorista/start.sh        # arranca y contesta cada 10 min
+```
+
+`start.sh` verifica requisitos, compila y arranca el loop. Dejá esa ventana
+abierta. Para que arranque solo al encender la máquina, ver el Paso 7 (servicios).
+El resto de esta guía explica cada pieza en detalle.
+
+---
+
 > ⚠️ **Importante — dónde corre esto**
 > Todo esto se instala y corre **en una computadora tuya** (tu PC/Mac) con el
 > navegador donde tenés abiertas las sesiones de IG/TikTok/FB. **No** funciona
