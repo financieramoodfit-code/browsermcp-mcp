@@ -111,8 +111,62 @@ maneja cuando vos (o un temporizador) se lo pedís. Para una ronda, pedile algo 
 > "Revisá los DMs y comentarios sin responder en Instagram, TikTok y Facebook, y
 > contestá según el prompt. Al final dame el cierre de turno."
 
-Para que corra solo cada X minutos necesitás un *scheduler* que dispare esa
-instrucción (cron, un script, o la función de tareas programadas de tu cliente).
+Para que corra solo cada X minutos, usá el scheduler incluido (Paso 6).
+
+### Paso 6 — Correr solo cada X minutos (scheduler)
+
+En esta carpeta hay un script, `scheduler.sh`, que dispara una ronda cada X
+minutos usando el CLI `claude` en modo *headless* con este mismo servidor Browser
+MCP. Requisitos: tener instalado el CLI `claude`, el repo compilado (`dist/`), y
+el navegador + extensión **Connected**.
+
+```bash
+cd docs/asistente-mood-mayorista
+./scheduler.sh 10      # una ronda cada 10 minutos (default: 10)
+```
+
+Qué hace en cada ronda:
+
+- Genera al vuelo la config MCP apuntando a `dist/index.js` (solo configurás
+  `REPO_DIR` si el repo está en otro lado).
+- Corre `claude -p` con el prompt del asistente (`--append-system-prompt`) y le
+  permite solo las herramientas `browser_*` (`--allowedTools`), sin pedir
+  confirmación por cada acción.
+- Usa un *lock* para no superponer rondas, aplica un timeout por ronda
+  (`RUN_TIMEOUT`, default 600 s) y deja un log por ronda en `logs/`.
+
+Variables opcionales: `REPO_DIR`, `PROMPT_FILE`, `LOG_DIR`, `RUN_TIMEOUT`.
+
+**Alternativa con cron** (en vez de dejar el script en loop). Ejemplo, cada 10
+minutos, corriendo una sola ronda por disparo (`INTERVAL` no aplica acá; el script
+haría loop, así que para cron conviene llamar directo a `claude`):
+
+```cron
+*/10 * * * * cd /ruta/al/repo && \
+  claude -p "Revisá y contestá lo pendiente en IG/TikTok/FB según el prompt; dame el cierre de turno." \
+    --append-system-prompt "$(cat docs/asistente-mood-mayorista/prompt-asistente.md)" \
+    --mcp-config docs/asistente-mood-mayorista/mcp-config.example.json \
+    --allowedTools "mcp__browsermcp__browser_navigate,mcp__browsermcp__browser_snapshot,mcp__browsermcp__browser_click,mcp__browsermcp__browser_type" \
+    >> docs/asistente-mood-mayorista/logs/cron.log 2>&1
+```
+
+> Nota: en `mcp-config.example.json` reemplazá la ruta placeholder por la ruta
+> absoluta real de tu `dist/index.js` antes de usarlo con cron.
+
+> ⚠️ Acceso al stock en modo headless: el conector de Google Sheets suele
+> requerir login interactivo y puede no estar disponible en `claude -p`. Si es tu
+> caso, dejá que el asistente lea la planilla abriéndola en el navegador
+> (`browser_navigate` + `browser_snapshot`) o registrá un MCP de Sheets no
+> interactivo.
+
+### Setup del repo en Claude Code on the web (SessionStart hook)
+
+Si además usás **Claude Code on the web** sobre este repo, ya está configurado un
+*SessionStart hook* (`.claude/hooks/session-start.sh` + `.claude/settings.json`)
+que, al iniciar cada sesión remota, corre `npm install` + `npm run build` para que
+el proyecto quede compilado y listo. Es sincrónico (garantiza deps antes de
+arrancar; se puede pasar a async si preferís arranque más rápido). Corre solo en
+el entorno web (`CLAUDE_CODE_REMOTE=true`); en local no hace nada.
 
 ---
 
@@ -164,3 +218,9 @@ instrucción (cron, un script, o la función de tareas programadas de tu cliente
 - `README.md` — esta guía.
 - `prompt-asistente.md` — el prompt completo del asistente, listo para pegar.
 - `mcp-config.example.json` — config de ejemplo para el cliente de IA.
+- `scheduler.sh` — dispara una ronda cada X minutos (modo headless con `claude`).
+
+También en la raíz del repo:
+
+- `.claude/hooks/session-start.sh` + `.claude/settings.json` — SessionStart hook
+  que compila el repo al iniciar sesiones de Claude Code on the web.
