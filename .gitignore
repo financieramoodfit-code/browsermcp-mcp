@@ -17,6 +17,11 @@ coverage
 # Turbo
 .turbo
 
+# Conciliador Semales working data (sensitive financial/personal data, not tracked)
+control_local.xlsx
+financiera.xlsx
+CONCILIACION_SEMALES_*.xlsx
+
 # Vercel
 .vercel
 
