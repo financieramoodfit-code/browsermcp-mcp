@@ -159,6 +159,18 @@ haría loop, así que para cron conviene llamar directo a `claude`):
 > (`browser_navigate` + `browser_snapshot`) o registrá un MCP de Sheets no
 > interactivo.
 
+### Paso 7 — Que arranque solo al encender la máquina (servicio)
+
+Para que trabaje solo sin abrir nada a mano, instalá el servicio/tarea de tu
+sistema operativo. Todo está en [`deploy/`](./deploy/README.md):
+
+- **Linux (systemd)**: `deploy/systemd/mood-asistente.service`
+- **macOS (launchd)**: `deploy/launchd/com.moodmayorista.asistente.plist`
+- **Windows (Tarea Programada)**: `deploy/windows/Install-MoodAsistente.ps1`
+
+El texto que dispara cada ronda está en `rutina-prompt.txt` (ya va embebido en
+`run-round.sh`; el archivo es por si querés pegarlo en otra herramienta).
+
 ### Setup del repo en Claude Code on the web (SessionStart hook)
 
 Si además usás **Claude Code on the web** sobre este repo, ya está configurado un
@@ -218,7 +230,11 @@ el entorno web (`CLAUDE_CODE_REMOTE=true`); en local no hace nada.
 - `README.md` — esta guía.
 - `prompt-asistente.md` — el prompt completo del asistente, listo para pegar.
 - `mcp-config.example.json` — config de ejemplo para el cliente de IA.
-- `scheduler.sh` — dispara una ronda cada X minutos (modo headless con `claude`).
+- `run-round.sh` — ejecuta UNA ronda (headless con `claude`). Base de todo.
+- `scheduler.sh` — loop que llama a `run-round.sh` cada X minutos.
+- `rutina-prompt.txt` — el prompt que dispara cada ronda.
+- `deploy/` — arranque automático: systemd (Linux), launchd (macOS), Tarea
+  Programada (Windows). Ver `deploy/README.md`.
 
 También en la raíz del repo:
 
