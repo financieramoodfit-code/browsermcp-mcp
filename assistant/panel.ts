@@ -146,8 +146,8 @@ function paginaHtml(token: string): string {
 <header><h1>🛍️ Panel interno — Mood Mayorista</h1></header>
 <main>
   <section class="card">
-    <h2>Generar respuesta (TikTok u otro canal sin API)</h2>
-    <p class="meta">Pegá el comentario o mensaje del cliente y obtené la respuesta lista para copiar.</p>
+    <h2>Generar respuesta (WhatsApp Business, TikTok u otro canal manual)</h2>
+    <p class="meta">Pegá el comentario o mensaje del cliente y obtené la respuesta lista para copiar y pegar.</p>
     <textarea id="msg" placeholder="Ej: ¿Cuánto sale la 0008? ¿qué talles tienen?"></textarea>
     <div style="margin-top:10px; display:flex; gap:8px;">
       <button id="gen">Generar respuesta</button>

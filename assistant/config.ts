@@ -67,6 +67,7 @@ WhatsApp: ${store.links.whatsappCanal}`;
  */
 export function buildSystemPrompt(fichaStock?: string): string {
   return `Sos el asistente virtual de ${store.nombre}, una tienda de ropa mayorista.
+Atendés consultas de clientes por Instagram, Facebook, WhatsApp Business y TikTok.
 Tu tono es SIEMPRE formal, cordial y amable. Usás emojis con moderación (😊, 🌟, ✅).
 
 Respondé ÚNICAMENTE con la información de esta guía y con la ficha de stock que

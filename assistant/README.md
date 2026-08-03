@@ -94,8 +94,9 @@ Una vez que el servidor está corriendo (`npm run assistant:start`), tu equipo
 puede entrar a `https://TU-DOMINIO/panel?token=TU_PANEL_TOKEN` y:
 
 - **Generar respuestas** pegando un comentario/mensaje del cliente (ideal para
-  **TikTok**, donde no hay API): el asistente arma la respuesta con precio, talles
-  y stock, y hay un botón para **copiarla**.
+  **WhatsApp Business** y **TikTok**, canales que se atienden a mano): el asistente
+  arma la respuesta con precio, talles y stock, y hay un botón para **copiarla** y
+  pegarla en el chat.
 - **Ver las derivaciones pendientes**: la lista de números de clientes que
   pidieron ser contactados, con botón para **copiar el número** y marcarlo como
   **enviado** una vez que lo pasaron al grupo PEDIDOS ONLINE.
@@ -122,6 +123,9 @@ permite.
 
 - ✅ Cerebro del asistente: persona + consulta de stock + respuestas con Claude — **funciona y está probado**.
 - ✅ Instagram y Facebook: **funciona**, pero necesita tu app de Meta, permisos aprobados, tokens y hosting.
-- ⚠️ TikTok: **no es posible** de forma autónoma por límites de la plataforma; queda semiautomático (el panel `/panel` genera la respuesta para copiar).
+- ⚠️ WhatsApp Business (app) y TikTok: se atienden **a mano** con ayuda del panel
+  `/panel` (genera la respuesta con precio/talles/stock para copiar y pegar). No hay
+  respuesta automática: WhatsApp Business (app) no tiene API abierta y TikTok tampoco.
+  La respuesta automática por WhatsApp solo sería posible con la WhatsApp Cloud API.
 - ⚠️ Grupo PEDIDOS ONLINE: el número queda registrado y visible en el panel para que una persona lo reenvíe.
-- ✅ Panel interno `/panel`: para generar respuestas (TikTok) y ver/gestionar derivaciones.
+- ✅ Panel interno `/panel`: para generar respuestas (WhatsApp Business, TikTok) y ver/gestionar derivaciones.
