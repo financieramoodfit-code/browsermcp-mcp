@@ -28,6 +28,11 @@ dist
 
 # Debug
 npm-debug.log*
+
+# Conciliacion data (sensitive financial spreadsheets, not for VCS)
+control_local.xlsx
+financiera.xlsx
+CONCILIACION_SEMALES_*.xlsx
 yarn-debug.log*
 yarn-error.log*
 
