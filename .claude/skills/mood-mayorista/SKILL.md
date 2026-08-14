@@ -7,15 +7,28 @@ description: Asistente virtual de Mood Mayorista. Usar cuando haya que revisar y
 
 ## 0. REQUISITOS DE EJECUCIÓN (leer primero)
 
-Esta skill **necesita el navegador del usuario** para funcionar. Antes de empezar,
-verificá que tengas disponibles las herramientas `browser_navigate`,
-`browser_snapshot`, `browser_click`, `browser_type` y `browser_screenshot`.
+Esta skill **necesita el navegador del usuario** para funcionar.
 
-- Si **no** están disponibles → parás acá y avisás: *"No tengo el servidor Browser MCP
-  conectado. Abrí la extensión Browser MCP en Chrome y apretá **Connect** en la pestaña,
-  después volvé a invocarme."* Ver `SETUP-MOOD.md` en la raíz del repo.
-- Si están disponibles pero el navegador no está logueado en alguna red → lo decís en el
-  reporte como pendiente. **Nunca** intentes loguearte vos ni pidas credenciales.
+**Verificá llamando, no mirando.** Que las herramientas `browser_*` figuren en tu lista
+NO significa que haya un navegador del otro lado: el servidor MCP puede estar corriendo
+con la extensión desconectada, y en ese caso las herramientas aparecen disponibles pero
+fallan al usarlas. La única verificación válida es **llamar a `browser_snapshot` y ver
+qué devuelve**:
+
+- Si devuelve `No connection to browser extension` (o cualquier error de conexión) → parás
+  acá y avisás: *"El servidor Browser MCP está corriendo pero no hay ninguna pestaña
+  conectada. Abrí Chrome, clic en el ícono de la extensión Browser MCP y apretá
+  **Connect** en la pestaña que quieras usar; después volvé a invocarme."*
+  Ver `SETUP-MOOD.md` en la raíz del repo. **No sigas con la ronda.**
+- Si las herramientas `browser_*` directamente no existen → el servidor MCP no está
+  registrado. Mismo camino: parás y mandás a `SETUP-MOOD.md`.
+- Si devuelve un snapshot de verdad → hay navegador, seguí.
+- Si hay navegador pero no está logueado en alguna red → lo decís en el reporte como
+  pendiente. **Nunca** intentes loguearte vos ni pidas credenciales.
+
+Si en medio de la ronda una llamada empieza a devolver errores de conexión (se cerró la
+pestaña, se desconectó la extensión), cortás ahí y reportás qué alcanzaste a hacer y qué
+quedó sin revisar. No des por revisado un canal que no llegaste a abrir.
 
 Nunca inventes contenido de mensajes, usuarios, precios ni stock. Si no lo pudiste leer
 de verdad en la pantalla o en la planilla, va a **Pendientes**.

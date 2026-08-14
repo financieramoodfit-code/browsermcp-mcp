@@ -156,7 +156,8 @@ La skill incluye las reglas no negociables del negocio:
 | Síntoma | Qué revisar |
 |---|---|
 | `/mcp` muestra browsermcp como *failed* | ¿Existe `dist/index.js`? Corré `npm run build`. Probá con ruta absoluta en `.mcp.json`. |
-| El asistente dice que no tiene herramientas de navegador | La extensión no está conectada. Abrí Chrome, clic en Browser MCP → **Connect**. |
+| `No connection to browser extension` | El servidor corre pero no hay pestaña conectada — es lo más común. Abrí Chrome, clic en Browser MCP → **Connect**. Ojo: en este estado las herramientas `browser_*` igual figuran como disponibles, así que el error recién aparece al usarlas. |
+| El asistente dice que no tiene herramientas de navegador | El servidor MCP no quedó registrado. Revisá `/mcp` y el `.mcp.json`. |
 | "Port 9009 in use" | Hay otra instancia del servidor corriendo. Cerrá las otras sesiones de Claude Code o matá el proceso. |
 | Lee la bandeja pero no encuentra los mensajes | Instagram/Facebook cambian el layout seguido. Pedile un `browser_screenshot` para ver qué está mirando. |
 | No encuentra el grupo PEDIDOS ONLINE | WhatsApp Web tiene que estar logueado con la cuenta que pertenece al grupo. |
