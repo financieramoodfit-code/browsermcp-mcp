@@ -40,7 +40,9 @@ $posix = "/" + ($roundScript -replace ":", "" -replace "\\", "/")
 $posix = $posix.Substring(0,2).ToLower() + $posix.Substring(2)
 
 $taskName = "MoodMayorista-Asistente"
-$action   = New-ScheduledTaskAction -Execute $BashExe -Argument "-lc `"$posix`""
+# Comillas simples alrededor de la ruta: sin ellas, un repo en una carpeta con
+# espacios (C:\Users\Mood Fit\...) hace que bash tome solo el primer pedazo.
+$action   = New-ScheduledTaskAction -Execute $BashExe -Argument "-lc `"'$posix'`""
 
 # Dispara al iniciar sesion y luego se repite cada N minutos, indefinidamente.
 $trigger = New-ScheduledTaskTrigger -AtLogOn

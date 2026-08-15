@@ -92,6 +92,26 @@ es el canal de ventas, no solo el bot.
 
 ---
 
+## Probado de verdad (15/08)
+
+- **Una ronda desatendida completa, ejecutada con el CLI real** (`RUN_TIMEOUT=240 bash
+  mood-asistente/run-round.sh` en el contenedor, que no tiene navegador). Resultado
+  correcto: llamó a `browser_snapshot`, recibió `No connection to browser extension`,
+  **frenó**, y entregó el cierre de turno con cero contestados, los cinco canales en
+  Pendientes y **sin inventar nada**. 19 segundos, exit 0. O sea que el `run-round.sh`
+  headless funciona: los flags del CLI son válidos, el `awk` que extrae la skill alimenta
+  bien el system prompt, y el corte por falta de navegador se cumple sin humano presente.
+- **Dos bugs en los archivos de servicio, arreglados:**
+  - systemd: había un `Environment=REPO=...` que **no lo leía nadie** (los scripts usan
+    `REPO_DIR`). Quien editara `REPO` para mover el repo de lugar hubiera dejado el
+    `ExecStart` apuntando a la ruta vieja. Se eliminó; ahora dice que hay que tocar las dos
+    rutas a mano (systemd no admite variables en la ruta del ejecutable).
+  - Windows: la tarea programada armaba `bash -lc "/c/ruta/run-round.sh"` sin comillas
+    internas, así que con el repo en una carpeta con espacios (`C:\Users\Mood Fit\…`)
+    fallaba. Verificado: exit **127** antes, exit **0** después.
+
+---
+
 ## Auditoría de la planilla (15/08) — dos defectos que iban a llegar al cliente
 
 Se leyó la planilla completa con el conector de Drive (740 filas, ~50 códigos de artículo,

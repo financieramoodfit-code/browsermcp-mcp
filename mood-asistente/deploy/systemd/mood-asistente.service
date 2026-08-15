@@ -1,7 +1,10 @@
 # Servicio de usuario systemd (Linux) — Asistente Virtual Mood Mayorista.
 #
 # Instalación (como TU usuario, en una sesión de escritorio con Chrome + extensión):
-#   1) Editá REPO abajo y, si hace falta, el PATH (que incluya node y claude).
+#   1) Si el repo NO está en ~/browsermcp-mcp, editá las DOS rutas de abajo
+#      (WorkingDirectory y ExecStart) y, si hace falta, el PATH (node y claude).
+#      systemd no permite variables en la ruta del ejecutable, así que hay que
+#      tocar las dos a mano.
 #   2) cp mood-asistente.service ~/.config/systemd/user/
 #   3) systemctl --user daemon-reload
 #   4) systemctl --user enable --now mood-asistente.service
@@ -18,8 +21,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-# Editá esta ruta:
-Environment=REPO=%h/browsermcp-mcp
+# Editá estas dos rutas si el repo está en otro lado:
 WorkingDirectory=%h/browsermcp-mcp/mood-asistente
 # Ajustá el PATH si node/claude están en otro lado (ver: which node; which claude)
 Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
