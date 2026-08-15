@@ -1,0 +1,33 @@
+# Servicio de usuario systemd (Linux) — Asistente Virtual Mood Mayorista.
+#
+# Instalación (como TU usuario, en una sesión de escritorio con Chrome + extensión):
+#   1) Si el repo NO está en ~/browsermcp-mcp, editá las DOS rutas de abajo
+#      (WorkingDirectory y ExecStart) y, si hace falta, el PATH (node y claude).
+#      systemd no permite variables en la ruta del ejecutable, así que hay que
+#      tocar las dos a mano.
+#   2) cp mood-asistente.service ~/.config/systemd/user/
+#   3) systemctl --user daemon-reload
+#   4) systemctl --user enable --now mood-asistente.service
+#   5) (opcional, para que corra sin login) loginctl enable-linger "$USER"
+#   Logs: journalctl --user -u mood-asistente -f   (y ./logs/ por ronda)
+#
+# NOTA: Browser MCP necesita un navegador gráfico logueado. Esto sirve en un
+# equipo de escritorio Linux, NO en un servidor headless sin navegador.
+
+[Unit]
+Description=Asistente Virtual Mood Mayorista (Browser MCP scheduler)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Editá estas dos rutas si el repo está en otro lado:
+WorkingDirectory=%h/browsermcp-mcp/mood-asistente
+# Ajustá el PATH si node/claude están en otro lado (ver: which node; which claude)
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/browsermcp-mcp/mood-asistente/scheduler.sh 10
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=default.target

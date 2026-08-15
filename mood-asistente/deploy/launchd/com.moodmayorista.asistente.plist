@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  launchd (macOS) — Asistente Virtual Mood Mayorista.
+
+  Corre run-round.sh cada 600 s (10 min). Requiere Chrome abierto + extensión
+  Browser MCP en Connect en esta Mac.
+
+  Instalación:
+    1) Reemplazá TU_USUARIO por tu usuario en TODAS las rutas de abajo.
+    2) Ajustá el PATH si node/claude están en otro lado (which node; which claude).
+    3) cp com.moodmayorista.asistente.plist ~/Library/LaunchAgents/
+    4) launchctl load ~/Library/LaunchAgents/com.moodmayorista.asistente.plist
+       (para detener: launchctl unload ~/Library/LaunchAgents/com.moodmayorista.asistente.plist)
+    Logs: ver StandardOutPath/StandardErrorPath abajo y ./logs/ por ronda.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.moodmayorista.asistente</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/TU_USUARIO/browsermcp-mcp/mood-asistente/run-round.sh</string>
+  </array>
+
+  <key>StartInterval</key>
+  <integer>600</integer>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/TU_USUARIO/browsermcp-mcp/mood-asistente/logs/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/TU_USUARIO/browsermcp-mcp/mood-asistente/logs/launchd.err.log</string>
+</dict>
+</plist>
