@@ -69,15 +69,28 @@ Comprobá dentro de Claude Code con `/mcp` que `browsermcp` figure como **connec
 
 ---
 
-## 4. Conectar la extensión
+## 4. Abrir el grupo de pestañas y conectar la extensión
 
-1. Abrí Chrome en la pestaña que querés automatizar (por ejemplo la bandeja de Instagram).
+### 4.1 El grupo "REDES SOCIALES"
+
+En [`mood-asistente/redes/`](./mood-asistente/redes/README.md) hay un archivo de marcadores
+para importar en Chrome. Te deja una carpeta **REDES SOCIALES** y, con clic derecho →
+*"Abrir todo en un grupo de pestañas nuevo"*, un grupo con las 8 pestañas que hacen falta:
+mensajes y comentarios de Instagram, TikTok y Facebook, WhatsApp Web y la planilla.
+
+Se arma una sola vez. También hay un `abrir-redes.sh` / `abrir-redes.ps1` si solo querés
+abrir las pestañas sin agruparlas.
+
+### 4.2 Conectar
+
+1. Abrí **una pestaña en blanco aparte** del grupo.
 2. Clic en el ícono de la extensión **Browser MCP**.
 3. Apretá **Connect**.
 
-La extensión controla **una pestaña por vez**. Cuando el asistente tenga que pasar de
-Instagram a Facebook o a WhatsApp Web, va a navegar en esa misma pestaña — no cierres la
-ventana mientras trabaja.
+La extensión controla **una pestaña por vez**: cuando el asistente pase de Instagram a
+Facebook o a WhatsApp Web, va a navegar dentro de esa misma pestaña. Por eso conviene
+dedicarle una en blanco y dejar las 8 del grupo quietas — sirven para mantener las sesiones
+iniciadas y para que vos mires. No cierres la ventana mientras trabaja.
 
 ---
 
