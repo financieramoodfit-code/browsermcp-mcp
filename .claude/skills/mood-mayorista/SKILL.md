@@ -112,6 +112,30 @@ Google Drive file ID: `1ixzRKmmfRSi2fR1gp-XVCYrT-414hDjuhHu0RSDtQTo`
   sea la prenda). El precio minorista es de uso interno: no se pasa salvo indicación
   expresa del dueño.
 
+### ⚠️ Cómo NO equivocarte de columna de precio
+
+La planilla tiene **ocho columnas de precio seguidas y sin encabezado legible**. Cada
+prenda usa solo dos o tres de esas ocho, y **no siempre las mismas**: hay artículos con
+precio en la 1ª y la 3ª, otros en la 5ª y la 7ª, y algunos con valores en tres columnas a
+la vez. Es decir: **la posición de la columna no te dice cuál es el precio mayorista.**
+
+El riesgo es concreto. En una prenda verificada, la primera columna con valor es $12.100 y
+la tercera es $20.000 — un 65% más. Si contás mal las columnas le pasás el **minorista** a
+un cliente mayorista.
+
+Por eso, regla obligatoria:
+
+1. **Identificá la columna por su título leído en pantalla**, nunca por su posición ni por
+   el orden en que aparecen los valores.
+2. Si el título de la columna **no se ve** o no podés determinar con certeza cuál es la de
+   MAYORISTA, **no pases ningún precio**. Respondé con el mensaje de "no encontré la
+   prenda" (sección 6) y dejalo en **Pendientes** aclarando: *"no pude identificar con
+   certeza la columna de precio mayorista en la planilla"*.
+3. Nunca deduzcas el mayorista dividiendo, estimando ni comparando con otra prenda.
+
+Que dudes de una columna y mandes la consulta a un vendedor no cuesta nada. Que le pases
+el precio minorista a un mayorista, sí.
+
 **Reglas de búsqueda:**
 
 - Los códigos de **Artículo, Color y Talle**, los **precios**, los **talles** y las
@@ -121,14 +145,22 @@ Google Drive file ID: `1ixzRKmmfRSi2fR1gp-XVCYrT-414hDjuhHu0RSDtQTo`
 - Si la prenda no aparece en la planilla, no inventes: pasale el catálogo y el WhatsApp
   (sección 6) y dejala marcada en el reporte.
 
-**Dos formas de leer la planilla — usá la que tengas disponible:**
+**Dos formas de leer la planilla:**
 
-- **Conector de Google Drive** (preferido, más rápido y sin scrollear):
-  `mcp__Google_Drive__read_file_content` con el file ID de arriba.
-- **Navegador**: `browser_navigate` a la URL de la planilla. Para buscar sin scrollear,
-  usá una celda vacía con `=FILTER` + `REGEXMATCH` concatenando las columnas relevantes
+- **Navegador** (la que sirve para precios): `browser_navigate` a la URL de la planilla.
+  Es la única forma en la que **ves los encabezados de las columnas**, que es lo que
+  necesitás para no confundir mayorista con minorista. Para buscar sin scrollear, usá una
+  celda vacía con `=FILTER` + `REGEXMATCH` concatenando las columnas relevantes
   (Artículo | Color | Talle) en una sola celda de texto. **Borrá la fórmula cuando
   termines** — la planilla es del negocio, no la dejes modificada.
+- **Conector de Google Drive** (`mcp__Google_Drive__read_file_content` con el file ID de
+  arriba): sirve para **encontrar la prenda** —código, descripción, colores y talles— pero
+  **devuelve la planilla sin encabezados**, así que de ahí **no se saca el precio**. Además
+  no siempre está disponible: en modo desatendido (`run-round.sh`) no existe.
+
+Ojo con el estado de la planilla: tiene celdas con `#REF!`, `#ERROR!` y `#N/A`. Si la fila
+de la prenda que buscás cae en una de esas, tratala como "no encontrada" y mandala a
+Pendientes: no intentes reconstruir el valor.
 
 ---
 
@@ -215,11 +247,22 @@ derives sin antes buscarla.
    **nombre o descripción** (modelo, tipo de prenda, color).
 2. Buscala en la planilla de stock (sección 3).
 3. Fijate si es prenda **nacional (Mood)** o **importada** y tomá el **precio mayorista**
-   que corresponda.
-4. Extraé **precio mayorista**, **talles disponibles** y **stock actual**.
+   que corresponda, identificando la columna **por su encabezado** (ver el recuadro de la
+   sección 3).
+4. Extraé **precio mayorista**, **talles** y **colores** disponibles.
 5. Respondé así:
 
-   *"El precio mayorista de [prenda] es $XXXX. Talles disponibles: [talles]. Stock actual: [cantidad]."*
+   *"El precio mayorista de [prenda] es $XXXX. Talles: [talles]. Colores: [colores]."*
+
+**Sobre el stock: no lo afirmes.** Hoy la columna de cantidad de la planilla está en **cero
+en todas las filas**, así que no refleja lo que hay en el local. Nunca digas "stock actual:
+X" ni "quedan X unidades" ni "no hay stock" a partir de ese número.
+
+- Si el cliente pregunta específicamente por disponibilidad, cerrá con:
+  *"Para confirmarte disponibilidad te paso con un vendedor 😊"* y derivalo según la
+  sección 7.
+- Solo podés informar una cantidad si la ves de verdad en la planilla y es un número real
+  distinto de cero.
 
 **Si no encontrás la prenda en la planilla**, no inventes ni improvises:
 

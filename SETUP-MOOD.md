@@ -143,13 +143,22 @@ La única fuente válida de precios, talles y cantidades es la planilla **STOCK 
 
 https://docs.google.com/spreadsheets/d/1ixzRKmmfRSi2fR1gp-XVCYrT-414hDjuhHu0RSDtQTo/edit?gid=1432692705#gid=1432692705
 
-Se puede leer de dos formas, y la skill soporta las dos:
+Se puede leer de dos formas, pero **no son intercambiables**:
 
-- **Conector de Google Drive de Claude** (más rápido, sin tocar la planilla). Si lo tenés
-  conectado en tu cuenta, Claude la lee directo.
 - **Por navegador**, con Browser MCP, usando fórmulas `=FILTER` + `REGEXMATCH` en una celda
   vacía. La skill tiene indicado **borrar la fórmula al terminar** para no dejar la
-  planilla modificada.
+  planilla modificada. Es la única forma que sirve para **precios**, porque es donde se ven
+  los encabezados de las columnas.
+- **Conector de Google Drive de Claude**: útil para encontrar la prenda (código, colores,
+  talles), pero devuelve la planilla **sin encabezados**, así que de ahí no se saca el
+  precio. En modo desatendido directamente no está disponible.
+
+> ⚠️ **Dos cosas de la planilla que conviene que sepas.** Tiene **ocho columnas de precio
+> sin encabezado legible**, y cada prenda usa dos o tres, no siempre las mismas — por eso
+> la skill obliga a identificar la columna por su título y a **no pasar precio** si no está
+> segura. Y la **columna de cantidad está en cero en todas las filas**, así que el
+> asistente tiene prohibido afirmar stock: cuando preguntan disponibilidad, deriva a un
+> vendedor. Si esa columna se empieza a cargar, avisá y lo cambiamos.
 
 ---
 

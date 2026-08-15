@@ -92,12 +92,40 @@ es el canal de ventas, no solo el bot.
 
 ---
 
+## Auditoría de la planilla (15/08) — dos defectos que iban a llegar al cliente
+
+Se leyó la planilla completa con el conector de Drive (740 filas, ~50 códigos de artículo,
+una sola pestaña `Sheet1`, modificada por última vez el 12/08). Resultado:
+
+1. **No hay fila de encabezados.** El conector devuelve las columnas solo por posición.
+   Hay **ocho columnas de precio** consecutivas y cada artículo usa dos o tres, no siempre
+   las mismas: 245 filas usan la 1ª y la 3ª, 164 usan la 5ª y la 7ª, y 15 tienen valor en
+   tres a la vez. **La posición no dice cuál es el mayorista.** En `YM1867` la 1ª columna
+   con valor es $12.100 y la 3ª es $20.000 — 65% más. La skill original mandaba "tomá el
+   precio mayorista" sin decir cómo distinguirlo: iba derecho a pasar minorista.
+2. **La columna de cantidad está en 0,00 en las 740 filas.** La plantilla de respuesta
+   decía *"Stock actual: [cantidad]"*, o sea que le hubiera contestado **"stock actual: 0"**
+   a todos los clientes.
+
+También hay 13 celdas rotas (`#REF!`, `#ERROR!`, `#N/A`).
+
+**Qué se cambió:** la skill ahora obliga a identificar la columna **por su encabezado leído
+en pantalla** y, si no puede, a **no pasar precio** y mandarlo a Pendientes; tiene prohibido
+afirmar stock a partir de la columna de cantidad (deriva a un vendedor); y el conector de
+Drive quedó degradado a "sirve para encontrar la prenda, no para el precio".
+
+**Pendiente del dueño:** confirmar qué es cada una de las ocho columnas de precio. Sin eso
+el asistente va a derivar más consultas de las necesarias.
+
+---
+
 ## Datos operativos confirmados
 
 - **Planilla STOCK VALORIZADO** — legible desde la nube con el conector de Google Drive.
   File ID: `1ixzRKmmfRSi2fR1gp-XVCYrT-414hDjuhHu0RSDtQTo`
   (Dato real verificado: `0002 · YM1867 TOP DE MORLEY` → mayorista $12.100, colores
-  MANTECA y GRIS MELANGE MEDIO, talles 1 a 5.)
+  MANTECA y GRIS MELANGE MEDIO, talles 1 a 5. Ese $12.100 es la **1ª** de las ocho
+  columnas de precio; la 3ª, $20.000, es el minorista.)
 - **Rotación de vendedores:** ELISEO → MAJO → GISEL. Antes de asignar hay que mirar el
   grupo PEDIDOS ONLINE para ver quién fue el último.
 - Todo lo demás (dirección, horarios, mínimos, medios de pago, links) está en la
