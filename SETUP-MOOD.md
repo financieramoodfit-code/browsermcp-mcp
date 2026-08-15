@@ -98,24 +98,42 @@ extensión no está conectada, te avisa en vez de inventar respuestas.
 
 ---
 
-## 6. Correrlo todos los días de 9 a 21 hs
+## 6. Correrlo solo, sin estar vos
 
-Dentro de la misma sesión de Claude Code:
+Hay tres niveles, de menos a más automático. Todos necesitan Chrome abierto con la
+extensión en **Connect**.
 
+### 6.1 A mano, cuando vos querés
+
+`/mood-mayorista` dentro de Claude Code. Vos ves cada respuesta antes de que salga.
+**Empezá por acá.**
+
+### 6.2 Cada X minutos, con la ventana abierta
+
+```bash
+bash mood-asistente/start.sh          # una ronda cada 10 min
+bash mood-asistente/start.sh 20       # o cada 20
 ```
-/loop 1h /mood-mayorista
-```
 
-Eso lo dispara cada una hora. **Ojo con dos cosas:**
+`start.sh` verifica requisitos, compila y arranca el loop. Dejá esa ventana abierta.
+Cada ronda queda registrada en `mood-asistente/logs/ronda-*.log`.
 
-- El loop corre mientras la sesión de Claude Code esté abierta y la extensión conectada.
-  Si cerrás la terminal o Chrome, se corta.
-- Los loops recurrentes vencen solos a los 7 días. Para volver a armarlo, repetí el comando.
+### 6.3 Arrancando solo con la máquina
 
-Si querés acotarlo estrictamente a la franja 09:00–21:00, la forma más simple es abrir la
-sesión a las 9 y cerrarla a las 21. También podés pedirle a Claude Code que arme una tarea
-programada con `CronCreate` usando la expresión `0 12-23,0 * * *` (equivale a 09–21 hs de
-Argentina, porque cron trabaja en UTC y Argentina es UTC−3).
+Servicios listos para Linux, macOS y Windows en
+[`mood-asistente/deploy/`](./mood-asistente/deploy/README.md).
+
+> ⚠️ **Leé esto antes de 6.2 y 6.3.** En modo desatendido el asistente **manda mensajes
+> reales a tus clientes sin que nadie los revise antes**. La skill está escrita para ser
+> conservadora —lo dudoso no se envía, va a Pendientes— pero eso no reemplaza mirar las
+> primeras rondas a mano. Revisá los logs unos días antes de confiarle el turno completo.
+
+### Sobre la franja 09–21 hs
+
+Los scripts corren siempre que estén andando. Para acotarlos al horario del local, lo más
+simple es arrancar `start.sh` a la mañana y cortarlo (Ctrl+C) al cerrar. Si querés que el
+sistema lo maneje, un `cron` con `0 9-21 * * *` llamando a `mood-asistente/run-round.sh`
+hace lo mismo sin que dependas de acordarte (cron local usa tu hora, no UTC).
 
 ---
 
