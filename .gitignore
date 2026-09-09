@@ -34,3 +34,6 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Conciliador Semales: downloaded/generated spreadsheets (not source)
+/*.xlsx
