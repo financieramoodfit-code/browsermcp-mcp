@@ -34,3 +34,7 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Datos de conciliacion (planillas con info sensible de clientes, no versionar)
+/*.xlsx
+!agentes/**/*.xlsx
