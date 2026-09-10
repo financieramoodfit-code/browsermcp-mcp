@@ -30,6 +30,7 @@ FIN_SHEET   = "AUTOMATIZACION"
 VENTANA_DIAS = _args.ventana   # ventana pedido -> transferencia
 IMPORTE_EXACTO = True     # tolerancia 0 (importe debe coincidir al peso)
 MAX_GRUPO = 4             # tam. maximo de agrupacion N->1 o 1->N
+MAX_NN = 4                # tam. maximo de cada lado en el cruce N->N
 SIM_ALTA = 0.72           # umbral de similitud de nombre para confianza Alta
 
 # ---------------- utilidades ----------------
@@ -317,6 +318,41 @@ def conciliar(local, fin):
             sim = max(name_sim(rem['cliente'], t['titular']) for t in found)
             concs.append(dict(tipo='un pedido -> varios comprobantes', remitos=[rem],
                               comps=list(found), monto=rem['importe'], sim=sim, conf='Media'))
+    # ---- Nivel 4: N remitos -> N comprobantes (mismo cliente) ----
+    # Caso real: dos remitos de $831.300 + $699.300 se pagaron con dos transferencias
+    # el mismo dia ($1.530.000 + $600). Ni N->1 ni 1->N lo cubren, y quedaban como
+    # faltante critico. Se exige nombre fuerte para no sumar coincidencias casuales.
+    grupos = defaultdict(list)
+    for rem in local:
+        if not rem['usado'] and rem['importe']:
+            grupos[norm_name(rem['cliente'])].append(rem)
+    for cli, rems in grupos.items():
+        disp_r = [r for r in rems if not r['usado']][:MAX_NN]
+        if len(disp_r) < 2: continue
+        disp_t = [t for t in fin if not t['usado'] and t['monto'] >= 1
+                  and name_sim(cli, t['titular']) >= SIM_ALTA][:MAX_NN]
+        if len(disp_t) < 2: continue
+        found = None
+        for kr in range(2, len(disp_r)+1):
+            for combo_r in combinations(disp_r, kr):
+                total = sum(r['importe'] for r in combo_r)
+                for kt in range(2, len(disp_t)+1):
+                    for combo_t in combinations(disp_t, kt):
+                        if sum(t['monto'] for t in combo_t) != total: continue
+                        if any(not win_ok(r['fecha'], t['fecha'])
+                               for r in combo_r for t in combo_t): continue
+                        found = (combo_r, combo_t); break
+                    if found: break
+                if found: break
+            if found: break
+        if found:
+            combo_r, combo_t = found
+            for r in combo_r: r['usado'] = True; r['match'] = 'N4'
+            for t in combo_t: t['usado'] = True
+            sim = max(name_sim(r['cliente'], t['titular']) for r in combo_r for t in combo_t)
+            concs.append(dict(tipo='varios pedidos -> varios comprobantes', remitos=list(combo_r),
+                              comps=list(combo_t), monto=sum(r['importe'] for r in combo_r),
+                              sim=sim, conf='Media'))
     return concs
 
 # ---------------- motivo probable para pendientes ----------------
@@ -359,8 +395,9 @@ tot_pend = sum(r['importe'] or 0 for r in pend)
 print(f"\n=== RESULTADO ===")
 print(f"Conciliados: {len(concs)} conciliaciones ({sum(len(c['remitos']) for c in concs)} remitos) | ${tot_conc:,}")
 print(f"  - 1 a 1: {sum(1 for c in concs if c['tipo']=='1 a 1')}")
-print(f"  - N->1 : {sum(1 for c in concs if 'varios pedidos' in c['tipo'])}")
-print(f"  - 1->N : {sum(1 for c in concs if 'un pedido' in c['tipo'])}")
+print(f"  - N->1 : {sum(1 for c in concs if c['tipo']=='varios pedidos -> un comprobante')}")
+print(f"  - 1->N : {sum(1 for c in concs if c['tipo']=='un pedido -> varios comprobantes')}")
+print(f"  - N->N : {sum(1 for c in concs if c['tipo']=='varios pedidos -> varios comprobantes')}")
 print(f"Pendientes (remitos sin conciliar): {len(pend)} | ${tot_pend:,}")
 print(f"Comprobantes sin pedido: {len(comp_sin)}")
 rem_tot = sum(len(c['remitos']) for c in concs) + len(pend)
@@ -476,7 +513,8 @@ wb = Workbook(); wb.remove(wb.active)
 # --- Hoja 1: Conciliados ---
 rows = []
 tipo_map = {'1 a 1': '1 a 1', 'varios pedidos -> un comprobante': 'N pedidos -> 1 comprobante',
-            'un pedido -> varios comprobantes': '1 pedido -> N comprobantes'}
+            'un pedido -> varios comprobantes': '1 pedido -> N comprobantes',
+            'varios pedidos -> varios comprobantes': 'N pedidos -> N comprobantes'}
 for c in sorted(concs, key=lambda x: (x['tipo'], -x['monto'])):
     rems = ", ".join(str(r['remito']) for r in c['remitos'])
     cli = c['remitos'][0]['cliente']
@@ -628,13 +666,26 @@ pend_anul = [r for r in pend if clasificar_estado(r['estado']) == 'ANULADO']
 pend_sin  = [r for r in pend if clasificar_estado(r['estado']) == 'SIN ESTADO']
 
 # desglose por grupo
-por_grupo = defaultdict(lambda: dict(rem=0, conc=0, crit=0, imp_crit=0))
+por_grupo = defaultdict(lambda: dict(rem=0, conc=0, crit=0, imp_crit=0, comps=0))
 for r in local:
     g = por_grupo[grupo_de(r['empresa'])]
     g['rem'] += 1
     if r['usado']: g['conc'] += 1
     elif clasificar_estado(r['estado']) == 'COBRADO':
         g['crit'] += 1; g['imp_crit'] += r['importe'] or 0
+for m in ing_win:
+    g = grupo_por_fila.get(m['fila'])
+    if g and g in por_grupo: por_grupo[g]['comps'] += 1
+
+# Un grupo cuyo dinero NO pasa por esta cuenta (casi ningun comprobante propio)
+# no se puede auditar contra esta planilla: sus "criticos" no son un faltante,
+# son cobros que hay que verificar en la cuenta donde si entran.
+def opera_por_esta_cuenta(g):
+    d = por_grupo[g]
+    cobrados = d['conc'] + d['crit']
+    return cobrados == 0 or d['comps'] >= 0.20 * cobrados
+crit_audit = sum(r['importe'] or 0 for r in crit if opera_por_esta_cuenta(grupo_de(r['empresa'])))
+crit_fuera = sum(r['importe'] or 0 for r in crit) - crit_audit
 
 pct = lambda n, d: f'{100*n/d:.1f}%' if d else ''
 M = [
@@ -659,8 +710,12 @@ M = [
  ('Total remitos analizados', n_rem, f"Hoja 1: {sum(1 for r in local if r['origen']=='Hoja1')} / Hoja 2: {sum(1 for r in local if r['origen']=='Hoja2')}"),
  ('Remitos CONCILIADOS (tienen su transferencia)', n_conc, pct(n_conc, n_rem)),
  ('  · 1 remito = 1 comprobante', sum(len(c['remitos']) for c in concs if c['tipo']=='1 a 1'), ''),
- ('  · Varios remitos pagados en 1 comprobante', sum(len(c['remitos']) for c in concs if 'varios' in c['tipo']), ''),
- ('  · 1 remito pagado en varios comprobantes', sum(len(c['remitos']) for c in concs if 'un pedido' in c['tipo']), ''),
+ ('  · Varios remitos pagados en 1 comprobante',
+  sum(len(c['remitos']) for c in concs if c['tipo']=='varios pedidos -> un comprobante'), ''),
+ ('  · 1 remito pagado en varios comprobantes',
+  sum(len(c['remitos']) for c in concs if c['tipo']=='un pedido -> varios comprobantes'), ''),
+ ('  · Varios remitos pagados con varias transferencias',
+  sum(len(c['remitos']) for c in concs if c['tipo']=='varios pedidos -> varios comprobantes'), ''),
  ('Importe conciliado', sum(c['monto'] for c in concs), ''),
  ('', '', ''),
  ('§D. REMITOS SIN CONCILIAR - DESGLOSE POR CAUSA', '', ''),
@@ -671,6 +726,8 @@ M = [
  ('  · Anulados', len(pend_anul), 'no corresponde cobro'),
  ('  · Sin estado cargado', len(pend_sin), ''),
  ('IMPORTE CRÍTICO (cobrado en local, sin respaldo)', sum(r['importe'] or 0 for r in crit), '⚠️ ver Hoja 2'),
+ ('  · FALTANTE REAL a investigar en esta cuenta', crit_audit, '⚠️ reclamar a la financiera'),
+ ('  · de grupos que NO cobran por esta cuenta', crit_fuera, 'verificar en la cuenta propia'),
  ('  · de esos, con candidato fuerte por nombre', n_flex_rescatables, '★ ver Hoja 6'),
  ('Importe pendiente de cobro (aún no pagado)', sum(r['importe'] or 0 for r in pend_real), 'a cobrar al cliente'),
  ('', '', ''),
@@ -679,8 +736,10 @@ M = [
 for g in sorted(por_grupo, key=lambda k: -por_grupo[k]['rem']):
     d = por_grupo[g]
     M += [(f'{g}  ·  remitos', d['rem'], pct(d['rem'], n_rem)),
-          (f'    conciliados', d['conc'], pct(d['conc'], d['rem'])),
-          (f'    críticos (cobrado sin transferencia)', d['crit'],
+          ('    conciliados', d['conc'], pct(d['conc'], d['rem'])),
+          ('    comprobantes propios en esta cuenta', d['comps'],
+           '' if opera_por_esta_cuenta(g) else '⚠️ cobra por otra cuenta'),
+          ('    críticos (cobrado sin transferencia)', d['crit'],
            f"${d['imp_crit']:,.0f}".replace(',', '.') if d['crit'] else '')]
 M += [
  ('', '', ''),
